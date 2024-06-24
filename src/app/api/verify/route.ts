@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import User from "@/models/signup.model";
 import dbConnect from "@/lib/db";
+import jwt from "jsonwebtoken"
 
 export async function POST(request: Request) {
     await dbConnect()
@@ -32,7 +33,17 @@ export async function POST(request: Request) {
         user.verified = true;
         await user.save();
   
-        return NextResponse.json({message:"verifeid"},{status: 200})
+        const token = jwt.sign({ userId: user._id}, process.env.JWT_SECRET!, { expiresIn: "1h" });
+        const response = NextResponse.json({
+            message: "verified successfully",
+            success: true,
+        });
+
+        response.cookies.set("token", token, {
+            httpOnly: true
+        });
+
+        return response;
       } catch (error) {
         console.error('Error verifying user:', error);
         return NextResponse.json({message:"Error verifing uer"},{status: 404})

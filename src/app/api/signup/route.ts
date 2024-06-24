@@ -2,6 +2,7 @@ import dbConnect from "@/lib/db";
 import User from "@/models/signup.model";
 import { sendMail } from "@/utils/sendMail";
 import { NextResponse } from "next/server";
+import bcryptjs from "bcryptjs"
 
 export async function POST(request: Request) {
   const verificationCode = Math.floor(100000 + Math.random() * 900000).toString(); // 
@@ -25,6 +26,9 @@ export async function POST(request: Request) {
       );
     }
 
+    // Hashing the password
+    const hashedPassword = await bcryptjs.hash(password, 10);
+
     // Sending verification email
     const emailResponse = await sendMail({ email, username, verificationCode });
 
@@ -32,7 +36,7 @@ export async function POST(request: Request) {
     const newUser = new User({
       email,
       username,
-      password,
+      password : hashedPassword,
       verified: false,
       verificationCode: verificationCode,
       verificationExpiry: new Date(Date.now() + 120000), // 1 hour from now
