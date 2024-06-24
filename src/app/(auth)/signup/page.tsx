@@ -34,11 +34,6 @@ export default function Signup() {
 
     try {
       setIsLoading(true)
-      // Validate form data
-      const validSignUp = verifySignupSchema.parse(formData);
-      console.log(validSignUp); // Log valid form data
-
-      // If validation succeeds, proceed with API call
       const response = await fetch('/api/signup', {
         method: 'POST',
         headers: {
@@ -60,7 +55,6 @@ export default function Signup() {
       }
 
     } catch (error: any) {
-      console.error('Validation Error:', error);
       setError(error.message); // Set validation error message
       setIsLoading(false)
     }
