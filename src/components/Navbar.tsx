@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link";
 import React from "react";
 
@@ -8,6 +10,21 @@ export default function Navbar() {
       { name: "Contact us", href: "/contatus" },
       { name: "Signup", href: "/signup" },
    ];
+
+   const handelSignout = async ()=>{
+      alert("You will Loggedout")
+      try {
+         const response = await fetch('/api/signout', {
+            method: 'GET',
+         })
+
+         if (response.ok) {
+            window.location.href = '/';
+         }
+      } catch (error) {
+         console.log("error logiing out:", error);
+      }
+   }
    return (
       <nav>
          <div className=" ">
@@ -17,10 +34,13 @@ export default function Navbar() {
                   {navlinks.map((links, index) => (
                      <div className="" key={index}>
                         <Link href={links.href}>
-                           <div className=" text-xl  hover:font-medium">{links.name}</div>
+                           <div className=" text-xl ">{links.name}</div>
                         </Link>
                      </div>
                   ))}
+                  <div className=" text-red-500 text-xl cursor-pointer" onClick={handelSignout}>
+                     signout
+                  </div>
                </div>
             </div>
          </div>

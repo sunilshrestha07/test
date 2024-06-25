@@ -1,51 +1,34 @@
-"use client";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import { redirect } from "next/navigation";
+import TokenVerify from "../components/tokenVerify";
 
-import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
-import { jwtDecode } from "jwt-decode"; // Try named import
+export const dynamic = 'force-dynamic'; // Ensures the page uses SSR
 
 interface DecodedToken {
-   // Define the structure of your token payload here
-   userId: string;
-   email: string;
-   iat: number;
-   exp: number;
+  userId: string;
 }
 
-export default function Home() {
-   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+export default async function Home() {
+  let isAuthenticated = false;
 
-   useEffect(() => {
-      const handleCookies = () => {
-         try {
-            const token = Cookies.get("token");
-            if (!token) {
-               setIsLoggedIn(false);
-               return;
-            }
-            const decoded: DecodedToken = jwtDecode(token);
-            if (decoded) {
-               setIsLoggedIn(true);
-               console.log("You are logged in");
-            }
-         } catch (error) {
-            console.log("User is not logged in", error);
-            setIsLoggedIn(false);
-         }
-      };
+  try {
+    const cookieStore = cookies();
+    const token = cookieStore.get("token")?.value || "";
 
-      handleCookies();
-   }, []);
+    if (token) {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
+      isAuthenticated = true;
+    }
+  } catch (error) {
+    console.log("Error verifying token:", error);
+  }
 
-   return (
-      <main>
-         <div>
-            {isLoggedIn ? (
-               <div>Hello user, you have logged in successfully</div>
-            ) : (
-               <div>Hello user, you are not logged in</div>
-            )}
-         </div>
-      </main>
-   );
+  return (
+    <main>
+      <div>
+        <TokenVerify isAuthenticated={isAuthenticated} />
+      </div>
+    </main>
+  );
 }
